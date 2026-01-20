@@ -136,15 +136,15 @@ function App() {
   }
 
   return (
-    <div className={`relative min-h-screen ${viewingWelcome ? 'overflow-hidden' : ''} bg-white`}>
-      {/* Auth screen (Handles its own scrolling) */}
+    <div className={`relative min-h-screen bg-white`}>
+      {/* Auth screen area */}
       {(welcomeExiting || !viewingWelcome) && (
-        <div className={`${viewingWelcome ? 'absolute inset-0' : 'relative w-full min-h-screen'} z-0 animate-auth-entrance`}>
+        <div className={`${viewingWelcome ? 'fixed inset-0 overflow-hidden' : 'relative min-h-screen flex flex-col'} z-0 animate-auth-entrance`}>
           <Auth />
         </div>
       )}
       
-      {/* Welcome Splash Screen (Dissolve Transition - Fades out on top) */}
+      {/* Welcome Splash Screen */}
       {viewingWelcome && (
         <div className={`fixed inset-0 z-50`}>
           <Welcome 

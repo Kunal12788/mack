@@ -14,16 +14,8 @@ const Auth: React.FC = () => {
     const hour = now.getHours();
     const minute = now.getMinutes();
     const totalMinutes = hour * 60 + minute;
-
-    // 6 AM to 11:50 AM: Good Morning
-    if (totalMinutes >= 360 && totalMinutes < 710) {
-      return 'Good Morning';
-    }
-    // 11:50 AM to 5 PM (17:00): Good Afternoon
-    if (totalMinutes >= 710 && totalMinutes < 1020) {
-      return 'Good Afternoon';
-    }
-    // 5 PM (17:00) till 6 AM: Good Evening
+    if (totalMinutes >= 360 && totalMinutes < 710) return 'Good Morning';
+    if (totalMinutes >= 710 && totalMinutes < 1020) return 'Good Afternoon';
     return 'Good Evening';
   }, []);
 
@@ -31,7 +23,6 @@ const Auth: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
     try {
       const { data, error: authError } = isLogin 
         ? await signIn(email, password)
@@ -40,7 +31,7 @@ const Auth: React.FC = () => {
       if (authError) {
         setError(authError.message);
       } else if (!isLogin && data.user && !data.session) {
-        setError("Account created! Please check your email for a confirmation link.");
+        setError("Account created! Please check your email.");
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
@@ -50,146 +41,121 @@ const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col relative w-full overflow-y-auto">
-      {/* Background Blobs (Fixed for visual stability) */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-400/5 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]"></div>
+    <div className="flex flex-col bg-slate-50 w-full h-[100dvh] relative overflow-hidden font-sans">
+      {/* Background Blobs - Scaled for Viewport */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-5%] left-[-5%] w-[50vw] h-[50vw] bg-blue-500/5 rounded-full blur-[100px] animate-pulse-soft"></div>
+        <div className="absolute bottom-[-5%] right-[-5%] w-[40vw] h-[40vw] bg-amber-500/5 rounded-full blur-[100px] animate-pulse-soft"></div>
       </div>
 
-      {/* Main Responsive Content Container */}
-      <div className="relative z-10 flex flex-col items-center w-full min-h-screen px-4 sm:px-8 py-8 sm:py-16">
+      <div className="relative z-10 flex flex-col items-center justify-between w-full h-full p-4 sm:p-6 md:p-10 lg:p-12">
         
-        {/* Branding Header */}
-        <div className="text-center mb-6 sm:mb-10 shrink-0">
-          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-blue-600 rounded-2xl shadow-2xl shadow-blue-500/20 mb-4 transition-transform hover:rotate-6">
-            <span className="text-2xl sm:text-3xl font-black text-white">N</span>
+        {/* Responsive Branding Segment */}
+        <header className="flex flex-col items-center shrink-0 mt-2 sm:mt-4">
+          <div className="relative inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-slate-900 rounded-2xl shadow-xl transition-transform hover:scale-105 duration-500">
+            <span className="text-xl sm:text-2xl font-black text-white">N</span>
+            <div className="absolute -inset-2 bg-blue-600/10 blur-xl rounded-full"></div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase tracking-[0.2em]">NAVEXA</h1>
-        </div>
+          <h1 className="mt-3 sm:mt-4 text-xl sm:text-2xl font-black text-slate-900 tracking-[0.3em] uppercase">NAVEXA</h1>
+        </header>
 
-        {/* Glassmorphic Auth Card */}
-        <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] p-6 sm:p-10 border border-white">
-          <div className="mb-6 sm:mb-8 text-center">
-            {isLogin ? (
-              <>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-1">
-                  {greeting}
-                </h2>
-                <div className="text-3xl sm:text-4xl mb-3 animate-bounce-subtle">👋</div>
-                <p className="text-slate-500 text-xs sm:text-sm font-medium leading-relaxed max-w-[200px] mx-auto">
-                  Welcome back. Please sign in to continue.
-                </p>
-              </>
-            ) : (
-              <>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-1">
-                  Create Account
-                </h2>
-                <p className="text-slate-500 text-xs sm:text-sm font-medium leading-relaxed">
-                  Join the next generation of fleet management.
-                </p>
-              </>
-            )}
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-            {error && (
-              <div className={`p-4 rounded-xl flex items-start gap-3 text-xs sm:text-sm animate-in fade-in ${error.includes('Confirmation') ? 'bg-blue-50 text-blue-700' : 'bg-rose-50 text-rose-700'}`}>
-                <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-500 transition-colors">
-                  <Mail size={16} />
-                </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-3 sm:py-4 bg-slate-50/50 border border-slate-200 rounded-xl sm:rounded-2xl text-slate-900 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
-                  placeholder="name@company.com"
-                />
-              </div>
+        {/* Adaptive Hub Card - Scalable Paddings */}
+        <main className="w-full max-w-md bg-white/95 backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.06)] border border-white flex flex-col justify-center overflow-hidden transition-all duration-300 mx-auto">
+          <div className="p-6 sm:p-8 md:p-10">
+            <div className="mb-6 sm:mb-8 text-center">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+                {isLogin ? greeting : "Join Hub"}
+              </h2>
+              <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] mt-1 opacity-60">
+                {isLogin ? "Operational Terminal" : "Enterprise Config"}
+              </p>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-500 transition-colors">
-                  <Lock size={16} />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-3 sm:py-4 bg-slate-50/50 border border-slate-200 rounded-xl sm:rounded-2xl text-slate-900 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-xl shadow-blue-600/20 transition-all transform hover:scale-[1.01] hover:shadow-blue-500/30 active:scale-[0.98] disabled:opacity-70"
-            >
-              {loading ? (
-                <Loader2 size={20} className="animate-spin" />
-              ) : (
-                <div className="flex items-center">
-                  <span className="text-base sm:text-lg">{isLogin ? 'Sign In' : 'Get Started'}</span>
-                  <ArrowRight size={18} className="ml-2" />
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+              {error && (
+                <div className="p-3 sm:p-4 rounded-xl bg-rose-50 border border-rose-100 flex items-start gap-3 text-[10px] sm:text-xs text-rose-700 animate-in fade-in slide-in-from-top-1">
+                  <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                  <span>{error}</span>
                 </div>
               )}
-            </button>
-          </form>
 
-          <div className="mt-6 sm:mt-8 text-center pt-5 sm:pt-6 border-t border-slate-50">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-xs sm:text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors"
-            >
-              {isLogin ? "Need a workspace? Create account" : "Already registered? Sign in"}
-            </button>
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Identity</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-600 transition-colors">
+                    <Mail size={16} />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="block w-full pl-11 pr-4 py-3 sm:py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl sm:rounded-2xl text-slate-900 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 transition-all outline-none"
+                    placeholder="user@navexa.com"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Secure Key</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-600 transition-colors">
+                    <Lock size={16} />
+                  </div>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full pl-11 pr-4 py-3 sm:py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl sm:rounded-2xl text-slate-900 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 transition-all outline-none"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 sm:h-14 flex items-center justify-center bg-slate-950 text-white font-black rounded-xl sm:rounded-2xl shadow-xl hover:bg-blue-600 transition-all transform active:scale-[0.97] disabled:opacity-70 group"
+              >
+                {loading ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  <div className="flex items-center text-xs sm:text-sm uppercase tracking-widest">
+                    <span>{isLogin ? 'Access Session' : 'Create Profile'}</span>
+                    <ArrowRight size={18} className="ml-3 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-[9px] font-black text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-[0.2em]"
+              >
+                {isLogin ? "Configure New Workspace" : "Return to Login"}
+              </button>
+            </div>
           </div>
-        </div>
+        </main>
 
-        {/* Pushes footer to bottom if screen is tall, otherwise remains in flow */}
-        <div className="flex-grow min-h-[2rem]"></div>
-
-        {/* Persistent Branding Footer - Scroll-safe position */}
-        <footer className="w-full max-w-2xl py-8 px-6 flex flex-col items-center shrink-0">
-          <div className="flex items-center space-x-4 sm:space-x-6 mb-3">
-            <div className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent to-slate-300"></div>
-            <p className="text-[8px] sm:text-[9px] uppercase font-[1000] tracking-[0.3em] text-slate-500 text-center">
-              Strategically Directed & Managed by DEBANJAN
+        {/* Global Scalable Footer */}
+        <footer className="w-full flex flex-col items-center shrink-0 mb-2 sm:mb-4">
+          <div className="flex items-center space-x-4 mb-4 opacity-40">
+            <div className="h-[1px] w-8 sm:w-16 bg-gradient-to-r from-transparent to-slate-900"></div>
+            <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.4em] text-slate-900 text-center whitespace-nowrap">
+              Strategically Managed by DEBANJAN
             </p>
-            <div className="h-[1px] w-8 sm:w-16 bg-gradient-to-l from-transparent to-slate-300"></div>
+            <div className="h-[1px] w-8 sm:w-16 bg-gradient-to-l from-transparent to-slate-900"></div>
           </div>
-          <div className="flex items-center justify-center gap-2 text-slate-300 opacity-80">
-            <ShieldCheck size={10} />
-            <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-[0.2em]">Enterprise Grade Security</span>
+          <div className="flex items-center justify-center gap-4 opacity-30">
+             <ShieldCheck size={12} />
+             <span className="text-[8px] font-black uppercase tracking-widest text-slate-900">Enterprise Protocol 2.5</span>
           </div>
         </footer>
       </div>
-
-      <style>{`
-        @keyframes bounce-subtle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
-        }
-        .animate-bounce-subtle {
-          animation: bounce-subtle 2s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 };
