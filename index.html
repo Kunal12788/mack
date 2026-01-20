@@ -6,21 +6,61 @@
     <title>Navexa - Travel Operations Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
       body {
         font-family: 'Inter', sans-serif;
         background-color: #f8fafc;
+        margin: 0;
+        /* Removed overflow: hidden to prevent content cutoff */
       }
-      /* Pre-loader styles */
-      .initial-loader {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        color: #64748b;
-        font-family: 'Inter', sans-serif;
+      
+      /* Entrance Animations */
+      @keyframes slideUpFade {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
       }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-20px) scale(1.05); }
+      }
+
+      @keyframes pulse-soft {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 0.7; }
+      }
+
+      .animate-slideUpFade {
+        opacity: 0;
+        animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .animate-fadeIn {
+        animation: fadeIn 1.2s ease-out forwards;
+      }
+
+      .animate-float {
+        animation: float 8s ease-in-out infinite;
+      }
+
+      .animate-pulse-soft {
+        animation: pulse-soft 4s ease-in-out infinite;
+      }
+
+      /* Premium Auth Entrance - Smoother & Longer */
+      @keyframes authEntrance {
+        from { opacity: 0; transform: scale(0.97) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      .animate-auth-entrance {
+        animation: authEntrance 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+      
       .loader-spinner {
         width: 40px;
         height: 40px;
@@ -49,13 +89,7 @@
 </script>
 </head>
   <body>
-    <div id="root">
-      <!-- Content here is visible BEFORE React loads -->
-      <div class="initial-loader">
-        <div class="loader-spinner"></div>
-        <div>Loading Navexa...</div>
-      </div>
-    </div>
+    <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
