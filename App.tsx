@@ -136,10 +136,10 @@ function App() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-white">
-      {/* Auth screen (Dissolve Transition - Fades in behind) */}
+    <div className={`relative min-h-screen ${viewingWelcome ? 'overflow-hidden' : ''} bg-white`}>
+      {/* Auth screen (Handles its own scrolling) */}
       {(welcomeExiting || !viewingWelcome) && (
-        <div className="absolute inset-0 z-0 animate-auth-entrance">
+        <div className={`${viewingWelcome ? 'absolute inset-0' : 'relative w-full min-h-screen'} z-0 animate-auth-entrance`}>
           <Auth />
         </div>
       )}
