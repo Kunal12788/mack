@@ -10,17 +10,23 @@ import {
   ChevronRight,
   UserCircle
 } from 'lucide-react';
+import { signOut } from '../services/dataService';
 
 interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  userEmail?: string;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, userEmail }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -87,16 +93,19 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
 
         {/* User Profile / Footer */}
         <div className="p-4 border-t border-slate-800 bg-slate-900/50">
-          <div className="flex items-center p-2 mb-2 rounded-lg bg-slate-800/50">
-            <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-300">
+          <div className="flex items-center p-2 mb-2 rounded-lg bg-slate-800/50 overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 shrink-0">
               <UserCircle size={24} />
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-white">Admin User</p>
-              <p className="text-xs text-slate-400">admin@navexa.com</p>
+            <div className="ml-3 overflow-hidden">
+              <p className="text-sm font-medium text-white truncate">Fleet Manager</p>
+              <p className="text-xs text-slate-400 truncate">{userEmail || 'User'}</p>
             </div>
           </div>
-          <button className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-all duration-200">
+          <button 
+            onClick={handleSignOut}
+            className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-all duration-200"
+          >
             <LogOut size={18} className="mr-3" />
             Sign Out
           </button>
@@ -116,7 +125,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => 
                 <span className="ml-3 text-lg font-semibold text-slate-800">Navexa</span>
             </div>
             <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-600 font-bold text-xs">
-              A
+              {userEmail?.[0].toUpperCase() || 'U'}
             </div>
         </header>
 
