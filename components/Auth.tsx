@@ -4,8 +4,8 @@ import { Mail, Lock, Loader2, AlertCircle, ArrowRight, ShieldCheck } from 'lucid
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('asd@gmail.com');
+  const [password, setPassword] = useState('123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

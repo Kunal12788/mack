@@ -4,10 +4,26 @@ import Dashboard from './components/Dashboard';
 import TripList from './components/TripList';
 import TripForm from './components/TripForm';
 import VehicleList from './components/VehicleList';
+import DriverList from './components/DriverList';
+import CustomerList from './components/CustomerList';
+import DriverForm from './components/DriverForm';
+import CustomerForm from './components/CustomerForm';
 import Auth from './components/Auth';
 import Welcome from './components/Welcome';
-import { getTrips, getVehicles, addTrip, updateTrip, calculateStats, onAuthStateChange, supabase } from './services/dataService';
-import { Trip, Vehicle, DashboardStats } from './types';
+import { 
+  getTrips, 
+  getVehicles, 
+  getDrivers, 
+  getCustomers,
+  addTrip, 
+  updateTrip, 
+  addDriver,
+  addCustomer,
+  calculateStats, 
+  onAuthStateChange, 
+  supabase 
+} from './services/dataService';
+import { Trip, Vehicle, Driver, Customer, DashboardStats } from './types';
 import { Plus } from 'lucide-react';
 import { Session } from '@supabase/supabase-js';
 
@@ -15,6 +31,8 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [trips, setTrips] = useState<Trip[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
@@ -23,6 +41,8 @@ function App() {
   const [welcomeExiting, setWelcomeExiting] = useState(false);
   
   const [isTripModalOpen, setIsTripModalOpen] = useState(false);
+  const [isDriverModalOpen, setIsDriverModalOpen] = useState(false);
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
 
   useEffect(() => {
@@ -47,9 +67,16 @@ function App() {
     if (!session) return;
     setLoading(true);
     try {
-      const [tripsRes, vehiclesRes] = await Promise.all([getTrips(), getVehicles()]);
+      const [tripsRes, vehiclesRes, driversRes, customersRes] = await Promise.all([
+        getTrips(), 
+        getVehicles(),
+        getDrivers(),
+        getCustomers()
+      ]);
       setTrips(tripsRes.data);
       setVehicles(vehiclesRes.data);
+      setDrivers(driversRes.data);
+      setCustomers(customersRes.data);
       setStats(calculateStats(tripsRes.data));
     } catch (error) {
       console.error("Failed to fetch data", error);
@@ -68,7 +95,6 @@ function App() {
 
   const handleWelcomeStart = () => {
     setWelcomeExiting(true);
-    // Cinema-Grade Cross-Fade: matches the 1500ms exit transition
     setTimeout(() => {
       setViewingWelcome(false);
     }, 1500);
@@ -85,14 +111,16 @@ function App() {
     setEditingTrip(null);
   };
 
-  const handleEditTrip = (trip: Trip) => {
-    setEditingTrip(trip);
-    setIsTripModalOpen(true);
+  const handleSaveDriver = async (driver: Omit<Driver, 'id'>) => {
+    await addDriver(driver);
+    await fetchData();
+    setIsDriverModalOpen(false);
   };
 
-  const openNewTripModal = () => {
-    setEditingTrip(null);
-    setIsTripModalOpen(true);
+  const handleSaveCustomer = async (customer: Omit<Customer, 'id'>) => {
+    await addCustomer(customer);
+    await fetchData();
+    setIsCustomerModalOpen(false);
   };
 
   if (loading && !session && !viewingWelcome) {
@@ -107,7 +135,7 @@ function App() {
   if (session) {
     return (
       <Layout activeTab={activeTab} onTabChange={setActiveTab} userEmail={session.user.email}>
-        <div className="max-w-7xl mx-auto pb-20">
+        <div className="max-w-7xl mx-auto pb-20 px-2 sm:px-0">
           {loading && (
             <div className="flex flex-col items-center justify-center h-96 space-y-4">
                <div className="loader-spinner"></div>
@@ -117,19 +145,67 @@ function App() {
           {!loading && (
             <>
               {activeTab === 'dashboard' && stats && <Dashboard stats={stats} trips={trips} />}
+              
               {activeTab === 'trips' && (
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h1 className="text-2xl font-bold text-slate-800">Trip Management</h1>
-                    <button onClick={openNewTripModal} className="flex items-center bg-blue-600 text-white px-6 py-2.5 rounded-xl hover:bg-blue-700 shadow-lg font-semibold"><Plus size={20} className="mr-2" />New Trip</button>
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                    <div>
+                        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Operation Ledger</h1>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 opacity-60">Synchronized Trip Data</p>
+                    </div>
+                    <button onClick={() => setIsTripModalOpen(true)} className="flex items-center bg-blue-600 text-white px-8 py-4 rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-600/20 font-black text-[10px] uppercase tracking-widest transition-all transform active:scale-95 group">
+                        <Plus size={16} className="mr-2 group-hover:rotate-90 transition-transform" />New Operation
+                    </button>
                   </div>
-                  <TripList trips={trips} vehicles={vehicles} onEdit={handleEditTrip} />
+                  <TripList trips={trips} vehicles={vehicles} onEdit={(trip) => { setEditingTrip(trip); setIsTripModalOpen(true); }} />
                 </div>
               )}
-              {activeTab === 'vehicles' && <div className="space-y-6"><h1 className="text-2xl font-bold text-slate-800">Fleet Management</h1><VehicleList vehicles={vehicles} /></div>}
+
+              {activeTab === 'vehicles' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                    <div>
+                        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Fleet Command</h1>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 opacity-60">Asset Tracking & Maintenance</p>
+                    </div>
+                    <VehicleList vehicles={vehicles} />
+                </div>
+              )}
+
+              {activeTab === 'drivers' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                    <div>
+                        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Personnel Hub</h1>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 opacity-60">Human Capital Management</p>
+                    </div>
+                    <button onClick={() => setIsDriverModalOpen(true)} className="flex items-center bg-slate-950 text-white px-8 py-4 rounded-2xl hover:bg-blue-600 shadow-xl font-black text-[10px] uppercase tracking-widest transition-all transform active:scale-95 group">
+                        <Plus size={16} className="mr-2 group-hover:rotate-90 transition-transform" />Register Personnel
+                    </button>
+                  </div>
+                  <DriverList drivers={drivers} />
+                </div>
+              )}
+
+              {activeTab === 'customers' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                    <div>
+                        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Client Ledger</h1>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 opacity-60">CRM Database</p>
+                    </div>
+                    <button onClick={() => setIsCustomerModalOpen(true)} className="flex items-center bg-slate-950 text-white px-8 py-4 rounded-2xl hover:bg-emerald-600 shadow-xl font-black text-[10px] uppercase tracking-widest transition-all transform active:scale-95 group">
+                        <Plus size={16} className="mr-2 group-hover:rotate-90 transition-transform" />Add Client Entity
+                    </button>
+                  </div>
+                  <CustomerList customers={customers} />
+                </div>
+              )}
             </>
           )}
-          {isTripModalOpen && <TripForm vehicles={vehicles} initialData={editingTrip} onSave={handleSaveTrip} onCancel={() => { setIsTripModalOpen(false); setEditingTrip(null); }} />}
+
+          {isTripModalOpen && <TripForm vehicles={vehicles} drivers={drivers} customers={customers} initialData={editingTrip} onSave={handleSaveTrip} onCancel={() => { setIsTripModalOpen(false); setEditingTrip(null); }} />}
+          {isDriverModalOpen && <DriverForm onSave={handleSaveDriver} onCancel={() => setIsDriverModalOpen(false)} />}
+          {isCustomerModalOpen && <CustomerForm onSave={handleSaveCustomer} onCancel={() => setIsCustomerModalOpen(false)} />}
         </div>
       </Layout>
     );
@@ -137,20 +213,14 @@ function App() {
 
   return (
     <div className={`relative min-h-screen bg-white`}>
-      {/* Auth screen area */}
       {(welcomeExiting || !viewingWelcome) && (
         <div className={`${viewingWelcome ? 'fixed inset-0 overflow-hidden' : 'relative min-h-screen flex flex-col'} z-0 animate-auth-entrance`}>
           <Auth />
         </div>
       )}
-      
-      {/* Welcome Splash Screen */}
       {viewingWelcome && (
         <div className={`fixed inset-0 z-50`}>
-          <Welcome 
-            onGetStarted={handleWelcomeStart} 
-            isExiting={welcomeExiting} 
-          />
+          <Welcome onGetStarted={handleWelcomeStart} isExiting={welcomeExiting} />
         </div>
       )}
     </div>

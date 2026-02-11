@@ -35,7 +35,9 @@ export interface Trip {
   id: string;
   date: string; // ISO Date string
   vehicleId: string;
+  driverId?: string;
   driverName: string;
+  customerId?: string;
   customerName: string;
   pickupLocation: string;
   dropLocation: string;
@@ -55,6 +57,23 @@ export interface Vehicle {
   nextServiceDueDate: string;
   insuranceExpiryDate: string;
   pollutionExpiryDate: string;
+}
+
+export interface Driver {
+  id: string;
+  name: string;
+  phone: string;
+  licenseNumber: string;
+  status: 'Active' | 'Inactive';
+  joiningDate: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
 }
 
 export interface DashboardStats {

@@ -8,7 +8,9 @@ import {
   X,
   LogOut,
   ChevronRight,
-  UserCircle
+  UserCircle,
+  Users,
+  Contact2
 } from 'lucide-react';
 import { signOut } from '../services/dataService';
 
@@ -32,10 +34,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, userE
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { id: 'trips', label: 'Trips', icon: <Map size={20} /> },
     { id: 'vehicles', label: 'Fleet', icon: <Car size={20} /> },
+    { id: 'drivers', label: 'Drivers', icon: <Users size={20} /> },
+    { id: 'customers', label: 'Customers', icon: <Contact2 size={20} /> },
   ];
 
   return (
-    <div className="flex h-[100dvh] bg-slate-50 overflow-hidden font-sans">
+    <div className="flex h-[100dvh] bg-[#F8FAFC] overflow-hidden font-sans">
       {/* Dynamic Overlay */}
       {isSidebarOpen && (
         <div 
@@ -57,7 +61,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, userE
             <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-xl shadow-blue-600/20">
               <span className="font-black text-white text-lg">N</span>
             </div>
-            <span className="text-xl font-black tracking-tighter text-white">NAVEXA</span>
+            <span className="text-xl font-black tracking-tighter text-white uppercase">NAVEXA</span>
           </div>
           <button onClick={toggleSidebar} className="lg:hidden text-slate-500 hover:text-white p-2 transition-colors">
             <X size={24} />
